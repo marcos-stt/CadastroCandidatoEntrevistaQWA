@@ -95,6 +95,32 @@ namespace Testes
         }
 
         [Test]
+        public void ValidacaoCpfIncorreto()
+        {
+            var pessoa = new PessoaForm
+            {
+                Nome = "João",
+                Sobrenome = "Silva",
+                CPF = "220.074.270-00",
+                DataDeNascimento = DateTime.Now.AddYears(-18),
+            };
+
+            var resultado = pessoa.Validar(out var validado);
+
+            Assert.IsNotNull(resultado);
+            Assert.IsNull(validado);
+
+            var camposIncorretos = new HashSet<string>();
+
+            foreach (var erro in resultado)
+            {
+                camposIncorretos.Add(erro.PropertyName);
+            }
+
+            Assert.IsTrue(camposIncorretos.Contains("CPF"));
+        }
+
+        [Test]
         public void ValidacaoOk()
         {
             var dtNasc18 = DateTime.Now.AddYears(-18);

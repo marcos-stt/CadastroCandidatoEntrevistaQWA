@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using FluentValidation;
@@ -9,9 +10,9 @@ namespace CadastroCandidato
 {
     public class PessoaForm
     {
-        public String? Nome { get; set; }
-        public String? Sobrenome { get; set; }
-        public String? CPF { get; set; }
+        public string? Nome { get; set; }
+        public string? Sobrenome { get; set; }
+        public string? CPF { get; set; }
         public DateTime? DataDeNascimento { get; set; }
 
         public IEnumerable<ValidationFailure>? Validar(out Pessoa? validado) {
@@ -48,15 +49,46 @@ namespace CadastroCandidato
                 .WithMessage("Data de nascimento no futuro");
         }
 
-        static bool CpfValidator(String? cpf)
+        static bool CpfValidator(string? cpf)
         {
             if(cpf is null) {
                 return true;
             }
-            
+
+            // Fontes: https://www.geradorcpf.com/algoritmo_do_cpf.htm https://www.somatematica.com.br/faq/cpf.php
             cpf = RegexDigitos.Replace(cpf, "");
 
-            // TODO: validação de CPF
+            if(cpf.Length != 11) {
+                return false;
+            }
+
+            var digitos = cpf.ToCharArray().Select(digito => (int)char.GetNumericValue(digito)).ToList();
+
+            var verificacao = new int[] { 0, 0 };
+            
+            for(int i = 0; i < 9; i ++) {
+                verificacao[0] += digitos[i] * (10 - i);
+            };
+            for(int i = 0; i < 10; i ++) {
+                verificacao[1] += digitos[i] * (11 - i);
+            };
+
+            for(int i = 0; i < 2; i++) {
+                verificacao[i] %= 11;
+                if(verificacao[i] < 2) {
+                    verificacao[i] = 0;
+                } else {
+                    verificacao[i] = 11 - verificacao[i];
+                }
+            }
+
+            for(int i = 0; i < 2; i++) {
+                if (verificacao[i] != digitos[9 + i])
+                {
+                    return false;
+                }
+            }
+
             return true;
         }
     }
