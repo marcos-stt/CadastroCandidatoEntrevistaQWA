@@ -296,6 +296,7 @@
           switch(status) {
             case "OK":
               alert("Inserido com sucesso");
+              this.limite -= this.candidatos.length;
               this.candidatos = [];
               this.cpfs = {};
               break;
@@ -304,6 +305,9 @@
               break;
             case "DUPLICADO":
               this.erroSalvar = "Cpfs duplicados: " + info.trim().split(",").join(", ");
+              break;
+            case "LIMITE":
+              this.erroSalvar = "Limite maximo atingido";
               break;
             default:
               this.erroSalvar = "Erro desconhecido";
