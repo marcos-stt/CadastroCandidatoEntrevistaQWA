@@ -44,7 +44,7 @@ namespace CadastroCandidato
             {
                 endpoints.MapGet("/", async context =>
                 {
-                    await context.Response.WriteAsync("Hello World!");
+                    context.Response.Redirect("/lista");
                 });
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
