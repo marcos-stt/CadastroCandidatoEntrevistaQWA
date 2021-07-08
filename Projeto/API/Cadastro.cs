@@ -22,7 +22,7 @@ namespace CadastroCandidato.API
 
         private async Task AtualizarLimite()
         {
-            LimiteTotal = 10;
+            LimiteTotal = 15;
 
             await using var cmd = new NpgsqlCommand("SELECT COUNT(id) FROM candidato", Connection);
             var cadastrado = (int)(long)await cmd.ExecuteScalarAsync();
