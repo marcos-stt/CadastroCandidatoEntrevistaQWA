@@ -23,7 +23,7 @@ namespace CadastroCandidato
                 validado = new Pessoa(
                     nome: Nome!,
                     sobrenome: Sobrenome!,
-                    cpf: CPF!,
+                    cpf: PessoaFormValidator.RegexDigitos.Replace(CPF!, ""),
                     dataDeNascimento: (DateTime)DataDeNascimento!
                 );
                 return null;
@@ -36,7 +36,8 @@ namespace CadastroCandidato
 
     public class PessoaFormValidator : AbstractValidator<PessoaForm>
     {
-        private readonly static Regex RegexDigitos = new(@"\D*");
+        public readonly static Regex RegexDigitos = new(@"\D*");
+
         public PessoaFormValidator()
         {
             RuleFor(pessoa => pessoa.Nome).NotEmpty();

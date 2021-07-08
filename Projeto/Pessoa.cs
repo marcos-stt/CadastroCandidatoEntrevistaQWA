@@ -10,6 +10,16 @@ namespace CadastroCandidato
         public string Nome { get; private set; }
         public string Sobrenome { get; private set; }
         public string CPF { get; private set; }
+        public string CPFFormatado {
+            get {
+                var cpf = PessoaFormValidator.RegexDigitos.Replace(CPF, "");
+                var g1 = cpf.Substring(0, 3);
+                var g2 = cpf.Substring(3, 3);
+                var g3 = cpf.Substring(6, 3);
+                var g4 = cpf.Substring(9, 2);
+                return $"{g1}.{g2}.{g3}.{g4}";
+            }
+        }
 
         public DateTime DataDeNascimento {
             get { return _DataNasc.Date; }
