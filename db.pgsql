@@ -1,0 +1,7 @@
+CREATE TABLE candidato (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(128) NOT NULL,
+    sobrenome VARCHAR(64) NOT NULL,
+    cpf VARCHAR(11) NOT NULL UNIQUE,
+    dtnasc TIMESTAMP NOT NULL
+);

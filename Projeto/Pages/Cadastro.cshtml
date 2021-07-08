@@ -112,9 +112,13 @@
             </tr>
           </tbody>
         </table>
-        <div class="field is-grouped is-grouped-right">
+        <div class="field is-grouped is-grouped-right" style="display: flex; flex-direction: row; align-items: center;">
+          <p class="help is-danger" v-if="erroSalvar">
+            {{erroSalvar}}
+          </p>
+          <div style="min-width: 16px"></div>
           <div class="control">
-            <button class="button is-link">Salvar</button>
+            <button class="button is-link" @@click="salvar()">Salvar</button>
           </div>
         </div>
       </div>
@@ -126,6 +130,7 @@
 </div>
 
 <script>
+  moment.locale("pt-br")
   const App = {
     data() {
       return {
@@ -136,6 +141,7 @@
           dtNasc: null,
         },
         erros: {},
+        erroSalvar: null,
         candidatos: [],
         cpfs: {},
         limite: parseInt("@Model.Limite"),
@@ -143,9 +149,11 @@
       }
     },
     mounted() {
-      IMask(this.$refs.cpf, {
-        mask: '000.000.000-00'
-      })
+      if(this.$refs.cpf) {
+        IMask(this.$refs.cpf, {
+          mask: '000.000.000-00'
+        })
+      }
     },
     methods: {
       async validarNome(soRemover = false) {
@@ -214,7 +222,7 @@
 
         this.candidatos.push({
           ...this.candidato,
-          dtNascFmt: dtNasc.format("ll"),
+          dtNascFmt: dtNasc.format("L"),
           idade: moment().diff(dtNasc, "years")
         });
         this.cpfs[this.candidato.cpf] = true;
@@ -271,6 +279,39 @@
         }
 
         return true;
+      },
+      async salvar() {
+        this.erroSalvar = null;
+        try {
+          let response = (await axios.post(
+              "api/cadastro",
+              app.candidatos.map(c => ({
+                nome: c.nome,
+                sobrenome: c.sobrenome,
+                cpf: c.cpf,
+                datadenascimento: c.dtNasc})),
+              {responseType: 'text'})).data
+          
+          let [status, info] = response.split(":")
+          switch(status) {
+            case "OK":
+              alert("Inserido com sucesso");
+              this.candidatos = [];
+              this.cpfs = {};
+              break;
+            case "VALIDACAO":
+              this.erroSalvar = "Erro de validação";
+              break;
+            case "DUPLICADO":
+              this.erroSalvar = "Cpfs duplicados: " + info.trim().split(",").join(", ");
+              break;
+            default:
+              this.erroSalvar = "Erro desconhecido";
+              break;
+          }
+        } catch {
+          this.erroSalvar = "Erro Interno";
+        }
       }
     }
   }

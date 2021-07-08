@@ -4,11 +4,13 @@
 
 @section Title { Candidatos - Lista }
 
-@section Head {}
+@section Head {
+  <script src="https://momentjs.com/downloads/moment-with-locales.min.js"></script>
+}
 
 <h1 class="title is-1">Lista de candidatos</h1>
 
-<table class="table">
+<table class="table" style="width: 100%;">
   <thead>
     <tr>
       <th>Nome</th>
@@ -20,13 +22,26 @@
     </tr>
   </thead>
   <tbody>
-    <tr>
-      <td>João</td>
-      <td>Silva</td>
-      <td>123.456.789.10</td>
-      <td>21/07/2000</td>
-      <td>20</td>
-      <td><span class="icon"><span class="material-icons">check</span></span></td>
-    </tr>
+    @foreach(var candidato in Model.Candidatos) {
+      <tr>
+        <td>@candidato.Nome</td>
+        <td>@candidato.Sobrenome</td>
+        <td>@candidato.CPFFormatado</td>
+        <td class="dtnasc">@candidato.DataDeNascimento.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)</td>
+        <td>@candidato.Idade</td>
+        <td><span class="icon">@if(candidato.Maior) {
+          <span class="material-icons">check</span>
+        } else {
+          <span class="material-icons">close</span>
+        } </span></td>
+      </tr>
+    }
   </tbody>
 </table>
+
+<script>
+  moment.locale("pt-br")
+  for(var elem of document.getElementsByClassName("dtnasc")) {
+    elem.textContent = moment(elem.textContent).format("L");
+  }
+</script>
