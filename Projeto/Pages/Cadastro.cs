@@ -9,11 +9,21 @@ namespace CadastroCandidato.Web
 {
     public class CadastroModel : PageModel
     {
+        public int Limite {get; set;}
+        public int LimiteTotal { get; set; }
+
+        private void AtualizarLimite() {
+            LimiteTotal = 15;
+            Limite = 15;
+        }
+        
         public void OnGet()
         {
+            AtualizarLimite();
         }
         public void OnPost()
         {
+            AtualizarLimite();
         }
     }
 }

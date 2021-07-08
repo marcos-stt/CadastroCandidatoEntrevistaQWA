@@ -1,84 +1,279 @@
 @page
-@model CadastroCandidato.Web.ListaModel
+@model CadastroCandidato.Web.CadastroModel
 @{ Layout = "Base"; }
 
 @section Title { Candidatos - Cadastro }
 
 @section Head { 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.1.4/vue.cjs.js"
-          integrity="sha512-2e2aXOh4/FgkCAUyurkjk0Uw4m1gPcExFwb1Ai4Ajjg97se/FEWfrLG1na4mq8cgOzouc8qLIqsh0EGksPGdqQ=="
-          crossorigin="anonymous"
-          referrerpolicy="no-referrer"></script>
+  <script src="https://momentjs.com/downloads/moment-with-locales.min.js"></script>
+  <script src="https://unpkg.com/imask@6.1.0/dist/imask.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.1.4/vue.global.min.js" integrity="sha512-2o9yv8UzUB+RI8iQlJLX3qfNO/W6beWFPfmSpyYwYHtDTaKSlQmnVCUGvAByTRN4NZQxJDgzvEt/iYNiGJ+K2g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 }
 
 <h1 class="title is-1">Cadastro de candidatos</h1>
 
-<div class="block">
-
-  <form action="#" method="GET" style="max-width: 700px">
-    <div class="field">
-      <label class="label">Nome</label>
-      <div class="control">
-        <input class="input" type="text">
+<div id="app">
+  <template v-if="limite != 0">
+    <div class="block">
+      <form action="#" method="GET">
+        <div class="field">
+          <label class="label">Nome</label>
+          <div class="control">
+            <input :class="['input', erros['nome'] ? 'is-danger' : null]" @@focusout="validarNome(true)"
+                   type="text" v-model="candidato.nome" id="nome" name="nome">
+          </div>
+          <p class="help is-danger" v-if="erros['nome']">
+            {{erros['nome']}}
+          </p>
+        </div>
+        <div class="field">
+          <label class="label">Sobrenome</label>
+          <div class="control">
+            <input :class="['input', erros['sobrenome'] ? 'is-danger' : null]" @@focusout="validarSobrenome(true)"
+                   type="text" v-model="candidato.sobrenome" id="sobrenome" name="sobrenome">
+          </div>
+          <p class="help is-danger" v-if="erros['sobrenome']">
+            {{erros['sobrenome']}}
+          </p>
+        </div>
+        <div class="field">
+          <label class="label">CPF</label>
+          <div class="control">
+            <input :class="['input', erros['cpf'] ? 'is-danger' : null]" @@focusout="validarCpf(true)"
+                   type="text" id="cpf" name="cpf" ref="cpf" @@keyup="atualizarCpf()" @@input="atualizarCpf()">
+          </div>
+          <p class="help is-danger" v-if="erros['cpf']">
+            {{erros['cpf']}}
+          </p>
+        </div>
+        <div class="field">
+          <label class="label">Data de Nascimento</label>
+          <div class="control">
+            <input :class="['input', erros['dtNasc'] ? 'is-danger' : null]" @@focusout="validarDtNasc(true)"
+                   type="date" v-model="candidato.dtNasc" id="dtNasc" name="dtNasc">
+          </div>
+          <p class="help is-danger" v-if="erros['dtNasc']">
+            {{erros['dtNasc']}}
+          </p>
+        </div>
+    
+        <div class="field is-grouped is-grouped-right" v-if="verificarLimite()">
+          <div class="control">
+            <button type="button" class="button is-link" @@click="adicionar($event)">Adicionar</button>
+          </div>
+        </div>
+        <div class="field is-grouped is-grouped-right" v-else style="display: flex; flex-direction: row; align-items: center;">
+          <p class="help is-danger">
+            Limite maximo de {{limite}} candidato{{limite != 1 ? 's' : ''}}
+          </p>
+          <div style="min-width: 16px"></div>
+          <div class="control">
+            <button type="button" class="button is-link" disabled>Adicionar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <br>
+    <div class="block">
+      <h2 class="title is-3">Pendentes</h2>
+      <div>
+        <table class="table" style="width: 100%">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Sobrenome</th>
+              <th>CPF</th>
+              <th>Data de Nascimento</th>
+              <th>Idade</th>
+              <th>É maior de idade?</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(candidato, idx) in candidatos">
+              <td>{{candidato.nome}}</td>
+              <td>{{candidato.sobrenome}}</td>
+              <td>{{candidato.cpf}}</td>
+              <td>{{candidato.dtNasc}}</td>
+              <td>{{candidato.idade}}</td>
+              <td><span class="icon">
+                <span class="material-icons" v-if="candidato.idade >= 18">check</span>
+                <span class="material-icons" v-else>close</span>
+              </span></td>
+              <td>
+                <span class="icon is-link">
+                  <span class="material-icons" @@click="editarCandidato(idx)">edit</span>
+                </span>
+                <span class="icon is-link">
+                  <span class="material-icons" @@click="deletarCandidato(idx)">delete</span>
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="field is-grouped is-grouped-right">
+          <div class="control">
+            <button class="button is-link">Salvar</button>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="field">
-      <label class="label">Sobrenome</label>
-      <div class="control">
-        <input class="input" type="text">
-      </div>
-    </div>
-    <div class="field">
-      <label class="label">CPF</label>
-      <div class="control">
-        <input class="input" type="text">
-      </div>
-    </div>
-    <div class="field">
-      <label class="label">Data de Nascimento</label>
-      <div class="control">
-        <input class="input" type="date">
-      </div>
-    </div>
-
-    <div class="field is-grouped is-grouped-right">
-      <div class="control">
-        <button type="button" class="button is-link">Adicionar</button>
-      </div>
-    </div>
-  </form>
+  </template>
+  <template v-else>
+    <h1 class="title is-3">Limite maximo de {{limiteTotal}} candidatos atingido</h1>
+  </template>
 </div>
-<br>
-<div class="block">
-  <h2 class="title is-3">Pendentes</h2>
-  <div style="max-width: 700px">
-    <table class="table" style="width: 100%">
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>Sobrenome</th>
-          <th>CPF</th>
-          <th>Data de Nascimento</th>
-          <th>Idade</th>
-          <th>É maior de idade?</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>João</td>
-          <td>Silva</td>
-          <td>123.456.789.10</td>
-          <td>21/07/2000</td>
-          <td>20</td>
-          <td><span class="icon"><span class="material-icons">check</span></span></td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="field is-grouped is-grouped-right">
-      <div class="control">
-        <button class="button is-link">Salvar</button>
-      </div>
-    </div>
-  </div>
-</div>
+
+<script>
+  const App = {
+    data() {
+      return {
+        candidato: {
+          nome: "",
+          sobrenome: "",
+          cpf: "",
+          dtNasc: null,
+        },
+        erros: {},
+        candidatos: [],
+        cpfs: {},
+        limite: parseInt("@Model.Limite"),
+        limiteTotal: parseInt("@Model.LimiteTotal"),
+      }
+    },
+    mounted() {
+      IMask(this.$refs.cpf, {
+        mask: '000.000.000-00'
+      })
+    },
+    methods: {
+      async validarNome(soRemover = false) {
+        let erros = {};
+        if(this.candidato.nome == null || this.candidato.nome.trim() == "") {
+          erros["nome"] = "campo obrigatório";
+        } else {
+          delete this.erros["nome"];
+        }
+        if(!soRemover || this.erros["nome"]) Object.assign(this.erros, erros)
+      },
+      async validarSobrenome(soRemover = false) {
+        let erros = {};
+        if(this.candidato.sobrenome == null || this.candidato.sobrenome.trim() == "") {
+          erros["sobrenome"] = "campo obrigatório";
+        } else {
+          delete this.erros["sobrenome"];
+        }
+        if(!soRemover || this.erros["sobrenome"]) Object.assign(this.erros, erros)
+      },
+      async validarCpf(soRemover = false) {
+        let erros = {};
+        if(this.candidato.cpf == null || this.candidato.cpf.trim() == "") {
+          erros["cpf"] = "campo obrigatório";
+        } else if(!this.candidato.cpf.match(/\D*(?:\d\D*){11}/) || !this.validarDigitoCpf(this.candidato.cpf)) {
+          erros["cpf"] = "cpf inválido";
+        } else if(this.candidato.cpf in this.cpfs) {
+          erros["cpf"] = "cpf já adicionado";
+        } else if(false /* TODO: verificar na base remota */) {
+          erros["cpf"] = "cpf já cadastrado";
+        } else {
+          delete this.erros["cpf"];
+        }
+        if(!soRemover || this.erros["cpf"]) Object.assign(this.erros, erros)
+      },
+      async validarDtNasc(soRemover = false) {
+        let dtNasc = null;
+        let erros = {};
+        if(this.candidato.dtNasc == null) {
+          erros["dtNasc"] = "campo obrigatório";
+        } else {
+          dtNasc = moment(this.candidato.dtNasc);
+          if(moment().diff(dtNasc) < 0) {
+            erros["dtNasc"] = "data de nascimento inválida";
+          } else {
+            delete this.erros["dtNasc"];
+          }
+        }
+        if(!soRemover || this.erros["dtNasc"]) Object.assign(this.erros, erros)
+        return dtNasc;
+      },
+      verificarLimite() {
+        return this.candidatos.length < this.limite;
+      },
+      async adicionar(event) {
+        this.erros = {};
+
+        await this.validarNome();
+        await this.validarSobrenome();
+        let dtNasc = await this.validarDtNasc();
+        await this.validarCpf();
+
+        if(Object.entries(this.erros).length != 0) {
+          return;
+        }
+
+        this.candidatos.push({
+          ...this.candidato,
+          dtNascFmt: dtNasc.format("ll"),
+          idade: moment().diff(dtNasc, "years")
+        });
+        this.cpfs[this.candidato.cpf] = true;
+
+        event.currentTarget.form.reset();
+        this.candidato = {
+          nome: "",
+          sobrenome: "",
+          cpf: "",
+          dtNasc: null,
+        };
+      },
+      editarCandidato(idx) {
+        let candidato = this.candidatos.splice(idx, 1);
+        delete this.cpfs[candidato[0].cpf]
+        Object.assign(this.candidato, candidato[0]);
+        this.$refs.cpf.value = this.candidato.cpf;
+      },
+      deletarCandidato(idx) {
+        let candidato = this.candidatos.splice(idx, 1);
+        delete this.cpfs[candidato[0].cpf]
+      },
+      atualizarCpf() {
+        this.candidato.cpf = this.$refs.cpf.value
+      },
+      validarDigitoCpf(cpf) {
+        cpf = cpf.replace(/\D*/g, "");
+
+        var digitos = cpf.split("").map(c => c.charCodeAt(0) - 0x30);
+
+        var verificacao = [0, 0];
+        
+        for(var i = 0; i < 9; i ++) {
+          verificacao[0] += digitos[i] * (10 - i);
+        };
+        for(var i = 0; i < 10; i ++) {
+          verificacao[1] += digitos[i] * (11 - i);
+        };
+
+        for(var i = 0; i < 2; i++) {
+          verificacao[i] %= 11;
+          if(verificacao[i] < 2) {
+            verificacao[i] = 0;
+          } else {
+            verificacao[i] = 11 - verificacao[i];
+          }
+        }
+
+        for(var i = 0; i < 2; i++) {
+          if (verificacao[i] != digitos[9 + i])
+          {
+            return false;
+          }
+        }
+
+        return true;
+      }
+    }
+  }
+
+  var app = Vue.createApp(App).mount('#app');
+</script>

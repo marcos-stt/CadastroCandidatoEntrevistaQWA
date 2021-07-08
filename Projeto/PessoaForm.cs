@@ -46,7 +46,7 @@ namespace CadastroCandidato
                 .Must(cpf => CpfValidator(cpf))
                 .WithMessage("CPF inválido");
             RuleFor(pessoa => pessoa.DataDeNascimento).NotEmpty()
-                .Must(data => (DateTime.Now.Date - data)?.TotalDays > 0)
+                .Must(data => (DateTime.Now.Date - data)?.TotalDays >= 0)
                 .WithMessage("Data de nascimento no futuro");
         }
 
