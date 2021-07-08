@@ -196,7 +196,7 @@
           erros["dtNasc"] = "campo obrigatório";
         } else {
           dtNasc = moment(this.candidato.dtNasc);
-          if(moment().diff(dtNasc) < 0) {
+          if(!dtNasc.isValid() || moment().diff(dtNasc) < 0) {
             erros["dtNasc"] = "data de nascimento inválida";
           } else {
             delete this.erros["dtNasc"];
