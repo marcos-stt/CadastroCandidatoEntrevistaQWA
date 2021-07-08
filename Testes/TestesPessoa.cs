@@ -43,6 +43,37 @@ namespace Testes
         }
 
         [Test]
+        public void ValidacaoCamposObrigatoriosVazios()
+        {
+            var pessoa = new PessoaForm
+            {
+                Nome = "",
+                Sobrenome = "",
+                CPF = "",
+                DataDeNascimento = null,
+            };
+
+            var resultado = pessoa.Validar(out var validado);
+
+            Assert.IsNotNull(resultado);
+            Assert.IsNull(validado);
+
+            var camposIncorretos = new HashSet<string>();
+
+            foreach (var erro in resultado)
+            {
+                camposIncorretos.Add(erro.PropertyName);
+            }
+
+            Assert.IsTrue(camposIncorretos.SetEquals(new HashSet<string> {
+                "Nome",
+                "Sobrenome",
+                "CPF",
+                "DataDeNascimento",
+            }));
+        }
+
+        [Test]
         public void ValidacaoCpfFormatoIncorreto()
         {
             var pessoa = new PessoaForm
